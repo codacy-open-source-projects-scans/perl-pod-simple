@@ -1,0 +1,11 @@
+_build
+blib
+Pod-Simple-*
+MANIFEST
+MANIFEST.bak
+*META.*
+Build
+Makefile
+Makefile.old
+pm_to_blib
+*.swp
