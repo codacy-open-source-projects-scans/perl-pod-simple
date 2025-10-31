@@ -1,0 +1,151 @@
+name: testsuite
+
+on:
+  push:
+    branches:
+      - "*"
+    tags-ignore:
+      - "*"
+  pull_request:
+
+jobs:
+  ubuntu:
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: perl -V
+        run: perl -V
+      - name: install dependencies
+        uses: perl-actions/install-with-cpm@v1
+        with:
+          install: |
+            Pod::Escapes
+            Text::Wrap
+      - name: Makefile.PL
+        run: perl -I$(pwd) Makefile.PL
+      - name: make test
+        run: make test
+
+  linux:
+    name: "linux ${{ matrix.perl-version }}"
+    needs: [ubuntu]
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version:
+          [
+            "5.40",
+            "5.38",
+            "5.36",
+            "5.34",
+            "5.32",
+            "5.30",
+            "5.28",
+            "5.26",
+            "5.24-buster",
+            "5.22-buster",
+            "5.20-buster",
+            "5.18-buster",
+            "5.16-buster",
+            "5.14-buster",
+            "5.12-buster",
+            "5.10-buster",
+            "5.8-buster",
+          ]
+
+    container:
+      image: perl:${{ matrix.perl-version }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: perl -V
+        run: perl -V
+      - name: install dependencies
+        uses: perl-actions/install-with-cpm@v1
+        with:
+          sudo: false
+          install: |
+            ExtUtils::MakeMaker
+            Pod::Escapes
+            Text::Wrap
+      - name: Makefile.PL
+        run: perl -I$(pwd) Makefile.PL
+      - name: make test
+        run: make test
+
+  macOS:
+    needs: [ubuntu]
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    runs-on: macOS-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version: [latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: perl -V
+        run: perl -V
+      - name: install dependencies
+        uses: perl-actions/install-with-cpm@v1
+        with:
+          install: |
+            Pod::Escapes
+            Text::Wrap
+      - name: Makefile.PL
+        run: perl -I$(pwd) Makefile.PL
+      - name: make test
+        run: make test
+
+  windows:
+    needs: [ubuntu]
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 0
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 0
+
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version: [latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Perl
+        run: |
+          choco install strawberryperl
+          echo "C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin" >> $GITHUB_PATH
+      - name: perl -V
+        run: perl -V
+      - name: install dependencies
+        uses: perl-actions/install-with-cpm@v1
+        with:
+          sudo: false
+          install: |
+            Pod::Escapes
+            Text::Wrap
+      - run: prove -vl t/*.t
