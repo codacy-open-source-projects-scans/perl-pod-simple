@@ -11,7 +11,7 @@ use Pod::Simple::TiedOutFH;
 #use utf8;
 
 our @ISA = ('Pod::Simple::BlackBox');
-our $VERSION = '3.44';
+our $VERSION = '3.47';
 
 our @Known_formatting_codes = qw(I B C L E F S U X Z);
 our %Known_formatting_codes = map(($_=>1), @Known_formatting_codes);
@@ -33,8 +33,8 @@ BEGIN {
     die "MANY_LINES is too small (", MANY_LINES(), ")!\nAborting";
   }
   if(defined &UNICODE) { }
-  elsif($] >= 5.008)   { *UNICODE = sub() {1}  }
-  else                 { *UNICODE = sub() {''} }
+  elsif( do { no integer; "$]" >= 5.008 } ) { *UNICODE = sub() {1}  }
+  else                                      { *UNICODE = sub() {''} }
 }
 if(DEBUG > 2) {
   print STDERR "# We are ", ASCII ? '' : 'not ', "in ASCII-land\n";
@@ -42,8 +42,8 @@ if(DEBUG > 2) {
 }
 
 # The NO BREAK SPACE and SOFT HYHPEN are used in several submodules.
-if ($] ge 5.007_003) {  # On sufficiently modern Perls we can handle any
-                        # character set
+if ( do { no integer; "$]" >= 5.007_003 } ) {  # On sufficiently modern Perls we can handle any
+                          # character set
   $Pod::Simple::nbsp = chr utf8::unicode_to_native(0xA0);
   $Pod::Simple::shy  = chr utf8::unicode_to_native(0xAD);
 }

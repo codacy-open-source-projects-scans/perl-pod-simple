@@ -6,7 +6,7 @@ use warnings;
 #sub Pod::Simple::DEBUG () {4};
 #sub Pod::Simple::PullParser::DEBUG () {4};
 
-our $VERSION = '3.44';
+our $VERSION = '3.47';
 use Pod::Simple::PullParser ();
 our @ISA;
 BEGIN {@ISA = ('Pod::Simple::PullParser')}
@@ -18,7 +18,7 @@ sub to_uni ($) {    # Convert native code point to Unicode
     my $x = shift;
 
     # Broken for early EBCDICs
-    $x = chr utf8::native_to_unicode(ord $x) if $] ge 5.007_003
+    $x = chr utf8::native_to_unicode(ord $x) if "$]" >= 5.007_003
                                              && ord("A") != 65;
     return $x;
 }
@@ -551,7 +551,7 @@ my $other_unicode =
         Pod::Simple::BlackBox::my_qr('([\x{10000}-\x{10FFFF}])', "\x{10000}");
 
 sub esc_uni($) {
-    use if $] le 5.006002, 'utf8';
+    use if do { no integer; "$]" <= 5.006002 }, 'utf8';
 
     my $x = shift;
 
